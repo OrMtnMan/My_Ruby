@@ -10,6 +10,7 @@ WIN_COMBOS = [[0, 1, 2], [3, 4, 5], [6, 7, 8],
 CORNERS = [0, 2, 6, 8]
 BOARD_SPLIT = '-------------'.center(60)
 BOARD = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+BEST_INITIAL_SQUARE = 5
 
 def prompt_return(str, ary)
   inp = ''
@@ -53,7 +54,7 @@ def play_game(turn, x_or_o, cpu_difficulty, winner = '', board = BOARD)
     else
       turn = cpu_turn(board, cpu_difficulty, x_or_o)
     end
-    winner = det_winner(board, x_or_o)
+    winner = determine_winner(board, x_or_o)
   end
 
   winner
@@ -68,7 +69,7 @@ def cpu_turn(board, cpu_difficulty, x_or_o)
   0
 end
 
-def det_winner(board, x_or_o)
+def determine_winner(board, x_or_o)
   winner = ''
   WIN_COMBOS.each do |combo|
     if combo.map { |n| board[n] }.count(x_or_o[:player]) == 3
@@ -85,7 +86,7 @@ end
 def hard_ai(board, x_or_o)
   corner_map = CORNERS.map { |n| board[n] }
 
-  return 5 if (board.count('X') + board.count('O')).zero?
+  return BEST_INITIAL_SQUARE if (board.count('X') + board.count('O')).zero?
 
   return offense_defense(board, x_or_o) if !offense_defense(board, x_or_o).nil?
 
@@ -122,6 +123,24 @@ def corner_play(board, x_or_o)
   end
 end
 
+def exit?(start)
+  start == 1
+end
+
+def diaplay_welcome_message(welcome_text, score)
+  puts welcome_text.center(60, '-')
+  puts ''
+end
+
+def display_score(score)
+  puts "The score is: You - #{score[:player]}, " \
+       "CPU - #{score[:cpu]}".center(60)
+  puts ''
+  puts "First one to #{score[:total]} wins is the " \
+       "overall winner!".center(60)
+  puts ''
+end
+
 welcome_text = 'Welcome to Connor\'s Tic-Tac-Toe!'
 
 score = { player: 0, cpu: 0, total: 0 }
@@ -129,18 +148,13 @@ score = { player: 0, cpu: 0, total: 0 }
 loop do
   system('clear') || system('cls')
 
-  puts welcome_text.center(60, '-')
-  puts ''
-  puts "The score is: You - #{score[:player]}, " \
-       "CPU - #{score[:cpu]}".center(60)
-  puts ''
-  puts "First one to #{score[:total]} wins is the " \
-       "overall winner!".center(60)
-  puts ''
+  display_welcome_message(welcome_text)
+
+  display_score(score)
 
   start = prompt_return(START_STR, [0, 1])
 
-  break if start == 1
+  break if exit?(start)
 
   cpu_difficulty = prompt_return(CPU_DIFFICULTY_STR, [0, 1])
   whos_first = prompt_return(WHOS_FIRST_STR, [0, 1, 2])
